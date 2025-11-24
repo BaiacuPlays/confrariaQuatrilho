@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Confraria Qu4trilho Colonial</title>
+
+  <!-- Fontes -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Link CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <a href="#" class="brand">
+      <img src=images/logo1.webp alt="Logo" />
+      <h1>QU4TRILHO</h1>
+    </a>
+    <nav>
+      <button class="menu-toggle" id="menuBtn">☰</button>
+      <ul id="navList">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#como-jogar">Como Jogar</a></li>
+        <li><a href="#noticias">Notícias</a></li>
+        <li><a href="#contato">Contato</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="home">
+  <div class="slider-viewport">
+    <div class="slider-track" id="sliderTrack">
+      <div class="slide" style="background-image: url('teste1.png');"></div>
+      <div class="slide" style="background-image: url('teste2.png');"></div>
+      <div class="slide" style="background-image: url('teste3.png');"></div>
+    </div>
+  </div>
+  <div class="hero-overlay"></div>
+  <button class="slider-btn prev-btn" id="prevBtn">❮</button>
+  <button class="slider-btn next-btn" id="nextBtn">❯</button>
+  <div class="hero-inner">
+    <h2>Confraria Qu4trilho Colonial</h2>
+    <p>Tradição, estratégia e amizade.</p>
+    <div class="cta-row">
+      <button class="btn btn-primary" onclick="document.getElementById('noticias').scrollIntoView()">Ver Notícias</button>
+    </div>
+  </div>
+</section>
+
+<main>
+  
+  <section id="sobre">
+    <div class="section-title-wrap"><h2>Sobre a Confraria</h2></div>
+    <div class="grid">
+      <div class="card"><h3>📜 Missão</h3><p>Preservar a tradição.</p></div>
+      <div class="card"><h3>🏆 Torneios</h3><p>Competições mensais.</p></div>
+      <div class="card"><h3>🤝 Jantares</h3><p>Encontros gastronômicos.</p></div>
+    </div>
+  </section>
+
+  <section id="como-jogar">
+    <div class="section-title-wrap"><h2>Como Jogar</h2></div>
+    <div class="steps">
+        <div class="step"><strong>1. Preparação</strong><div>Distribuição das cartas.</div></div>
+        <div class="step"><strong>2. Leilão</strong><div>Definição da aposta.</div></div>
+        <div class="step"><strong>3. Jogo</strong><div>Disputa das vazas.</div></div>
+        <div class="step"><strong>4. Pontos</strong><div>Contagem final.</div></div>
+    </div>
+  </section>
+
+  <!-- SEÇÃO DE NOTÍCIAS DINÂMICA -->
+  <section id="noticias">
+    <div class="section-title-wrap">
+      <h2>Últimas Notícias</h2>
+      <p class="muted">Clique para ler mais</p>
+    </div>
+    <!-- O Javascript vai injetar as notícias AQUI dentro -->
+    <div class="grid" id="newsGrid" style="grid-template-columns: 1fr;">
+      <!-- Vazio inicialmente -->
+    </div>
+  </section>
+
+<section id="patrocinadores">
+    <div class="section-title-wrap">
+      <h2>Nossos Parceiros</h2>
+      <p class="muted">Apoio que fortalece a tradição</p>
+    </div>
+    <div class="sponsors-container">
+      <img src=images/patrocinadores2.png alt="Agrimar e Sicredi" class="sponsor-full-img">
+      
+    </div>
+  </section>
+
+  <section id="contato">
+    <div class="section-title-wrap"><h2>Fale Conosco</h2></div>
+    <form class="contact-form">
+      <input type="text" placeholder="Nome">
+      <input type="email" placeholder="Email">
+      <textarea rows="3" placeholder="Mensagem"></textarea>
+      <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+  </section>
+
+  <!-- ÁREA DO ADMIN (Protegida visualmente) -->
+  <section id="adminPanel" style="display:none; border: 2px dashed red; background: #fff5f5;">
+    <div class="section-title-wrap">
+      <h2 style="color:red">Área do Administrador</h2>
+      <p>Adicionar Nova Notícia</p>
+    </div>
+    <form class="contact-form" id="adminForm">
+      <input type="text" id="newsTitle" placeholder="Título da Notícia" required>
+      <input type="text" id="newsImage" placeholder="Link da Imagem (URL)" required>
+      <input type="text" id="newsSummary" placeholder="Resumo (aparece na capa)" required>
+      <textarea id="newsFull" rows="6" placeholder="Texto Completo da Notícia" required></textarea>
+      <button type="submit" class="btn btn-primary" style="background: red; border:none;">Publicar Notícia</button>
+    </form>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-logo-wrap">
+    <img src=images/logo2.png alt="Qu4trilho Gaúcho">
+  <div>© 2025 Confraria Qu4trilho Colonial</div>
+  <!-- Link secreto para abrir o admin -->
+  <div style="margin-top:10px; font-size:12px;">
+    <a href="#" onclick="toggleAdmin()">Admin</a>
+  </div>
+</footer>
+
+<!-- MODAL (POPUP) DE NOTÍCIA -->
+<div id="newsModal" class="modal-overlay">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <img id="modalImg" src="" alt="">
+    <h2 id="modalTitle"></h2>
+    <p id="modalDate" class="meta"></p>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
