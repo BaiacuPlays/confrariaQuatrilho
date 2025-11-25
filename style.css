@@ -627,6 +627,69 @@ footer a {
   position: relative !important; /* Importante para o botão ficar no canto certo */
 }
 
+.rules-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Colunas responsivas */
+  gap: 25px;
+}
+
+.rule-block {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border-top: 5px solid var(--vinho); /* Detalhe colorido no topo */
+}
+
+.rule-block h3 {
+  color: var(--verde);
+  font-family: 'Cinzel', serif;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.rule-block ul, .rule-block ol {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.rule-block li {
+  margin-bottom: 8px;
+  color: #444;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Caixinhas de Destaque/Alerta */
+.alert-box {
+  background-color: #f9f9f9;
+  border-left: 4px solid var(--dourado);
+  padding: 15px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 15px;
+  color: #555;
+}
+
+.alert-box strong {
+  color: var(--vinho);
+  display: block;
+  margin-bottom: 5px;
+}
+
+.alert-box.warning {
+  background-color: #fff5f5;
+  border-left-color: #d9534f; /* Vermelho para penalidades */
+}
+
+/* Ajuste Mobile para as regras */
+@media(max-width: 600px) {
+  .rules-container {
+    grid-template-columns: 1fr; /* Uma coluna só no celular */
+  }
+}
+
 /* Mobile */
 @media (max-width: 900px) {
     .hero h2 {
