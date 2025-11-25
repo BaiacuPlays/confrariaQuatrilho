@@ -114,12 +114,18 @@
       <p>Adicionar Nova Notícia</p>
     </div>
     <form class="contact-form" id="adminForm">
-      <input type="text" id="newsTitle" placeholder="Título da Notícia" required>
-      <input type="text" id="newsImage" placeholder="Link da Imagem (URL)" required>
-      <input type="text" id="newsSummary" placeholder="Resumo (aparece na capa)" required>
-      <textarea id="newsFull" rows="6" placeholder="Texto Completo da Notícia" required></textarea>
-      <button type="submit" class="btn btn-primary" style="background: red; border:none;">Publicar Notícia</button>
-    </form>
+  
+  <input type="text" id="newsTitle" placeholder="Título da Notícia" required>
+  
+  <!-- MUDANÇA AQUI: De input text para input file -->
+  <label style="display:block; margin-bottom:5px; color:#666;">Imagem ou Vídeo de Capa:</label>
+  <input type="file" id="newsFile" accept="image/*, video/*, image/gif" required style="background:white;">
+  
+  <input type="text" id="newsSummary" placeholder="Resumo (aparece na capa)" required>
+  <textarea id="newsFull" rows="6" placeholder="Texto Completo da Notícia" required></textarea>
+  
+  <button type="submit" class="btn btn-primary" style="background: red; border:none;">Publicar Notícia</button>
+</form>
   </section>
 
 </main>
@@ -138,7 +144,6 @@
 <div id="newsModal" class="modal-overlay">
   <div class="modal-content">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <img id="modalImg" src="" alt="">
     <h2 id="modalTitle"></h2>
     <p id="modalDate" class="meta"></p>
     <div id="modalBody"></div>
