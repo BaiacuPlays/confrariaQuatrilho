@@ -560,6 +560,73 @@ footer a {
     cursor: pointer;
 }
 
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px; /* Um pouco maior */
+  height: 40px;
+  background-color: #ff0000;
+  color: white;
+  border: 3px solid white; /* Borda grossa para contraste */
+  border-radius: 50%;
+  font-size: 18px;
+  z-index: 9999; /* Valor altíssimo para ficar na frente de tudo */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+  transition: transform 0.2s;
+}
+.delete-btn:hover {
+  transform: scale(1.1);
+  background-color: #cc0000;
+}
+
+.modal-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Grade automática */
+  gap: 10px;
+  margin-bottom: 20px;
+  max-height: 400px;
+  overflow-y: auto; /* Rolagem se tiver muita foto */
+  padding-right: 5px;
+}
+
+.gallery-item video,
+.gallery-item img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #eee;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.gallery-item img:hover {
+  opacity: 0.8;
+}
+
+/* Ícone de aviso que tem galeria na capa */
+.gallery-icon {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+/* Ajuste para o card aceitar o posicionamento absoluto do botão */
+.news-item {
+  position: relative !important; /* Importante para o botão ficar no canto certo */
+}
+
 /* Mobile */
 @media (max-width: 900px) {
     .hero h2 {
