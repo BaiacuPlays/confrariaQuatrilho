@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <!-- Meta tag essencial para evitar zoom indesejado no celular -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quatrilho Gaúcho - Jogo Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESTILOS GERAIS --- */
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #222; overflow: hidden; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
+        #game-table {
+            width: 100vw; height: 100vh;
+            background: radial-gradient(circle, #1a6b36 0%, #0d381c 90%);
+            position: relative; display: flex; justify-content: center; align-items: center;
+        }
+
+        #center-area {
+            position: absolute; width: 250px; height: 250px;
+            display: flex; justify-content: center; align-items: center; pointer-events: none;
+            border: 3px solid rgba(255,255,255,0.05); border-radius: 50%;
+        }
+
+        /* --- HUD (PLACAR) --- */
+        #hud {
+            position: absolute; top: 10px; left: 10px;
+            color: #d4af37; font-family: 'Cinzel', serif; font-size: 16px;
+            background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px;
+            border: 1px solid #d4af37; z-index: 500; min-width: 150px;
+        }
+        #trump-indicator { font-size: 20px; color: white; margin-top: 5px; font-weight: bold; }
+        .score-row { display: flex; justify-content: space-between; font-size: 13px; margin-top: 5px; color: #ccc; }
+
+        /* --- CARTAS (Responsivo) --- */
+        .card {
+            width: 80px; height: 120px; /* Tamanho PC */
+            background: white; border-radius: 6px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; justify-content: space-between; padding: 4px; box-sizing: border-box;
+            font-weight: bold; font-size: 20px; 
+            position: absolute; transition: transform 0.2s, top 0.5s, left 0.5s; z-index: 10;
+        }
+        .card.suit-red { color: #d40000; }
+        .card.suit-black { color: #000; }
+        .card-back {
+            background: linear-gradient(135deg, #7b1240 25%, #5a0f33 25%, #5a0f33 50%, #7b1240 50%, #7b1240 75%, #5a0f33 75%);
+            background-size: 15px 15px; border: 2px solid #fff;
+        }
+
+        /* --- POSIÇÕES DOS JOGADORES --- */
+        .player-hand { position: absolute; display: flex; justify-content: center; align-items: center; }
+        
+        /* Você (Baixo) */
+        #p0 { bottom: 20px; width: 100%; height: 140px; z-index: 200; }
+        /* Direita */
+        #p1 { right: 40px; top: 50%; height: 300px; flex-direction: column; transform: translateY(-50%); }
+        /* Cima */
+        #p2 { top: 20px; width: 100%; }
+        /* Esquerda */
+        #p3 { left: 40px; top: 50%; height: 300px; flex-direction: column; transform: translateY(-50%); }
+
+        /* Interatividade da sua mão */
+        .my-card { 
+            position: relative !important; cursor: pointer; transition: 0.2s; 
+            margin: 0 -25px; /* Sobreposição PC */
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3); 
+        }
+        .my-card:hover { transform: translateY(-30px); z-index: 300; margin: 0 5px; }
+        .my-card.disabled { filter: grayscale(1); cursor: not-allowed; opacity: 0.6; }
+        .hand-disabled { opacity: 0.7; pointer-events: none; }
+
+        /* --- MODAIS --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .modal-content {
+            background: #fff; padding: 20px; border-radius: 10px; text-align: center;
+            border: 3px solid #d4af37; width: 300px; max-width: 90%;
+        }
+        .btn {
+            background: #114b2e; color: white; border: none; padding: 12px 24px;
+            margin: 5px; font-size: 16px; cursor: pointer; border-radius: 5px; font-weight: bold;
+            touch-action: manipulation; /* Melhora toque no celular */
+        }
+        .btn:hover { background: #1a6b36; transform: scale(1.05); }
+        .btn-pass { background: #7b1240; }
+        .btn-suit { font-size: 24px; width: 60px; }
+
+        #message-toast {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9); color: #d4af37; padding: 15px 30px;
+            font-size: 24px; border-radius: 10px; z-index: 600; display: none;
+            font-family: 'Cinzel', serif; pointer-events: none; border: 2px solid #d4af37; text-align:center;
+            width: 80%;
+        }
+
+        .btn-exit { position:absolute; top:10px; right:10px; padding:8px 15px; background:#444; color:white; border:none; border-radius:4px; cursor:pointer; z-index:600;}
+
+        /* --- TELA DE ROTAÇÃO (MOBILE) --- */
+        #rotate-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #111; z-index: 9999; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            color: white; text-align: center;
+        }
+        #rotate-screen span { font-size: 50px; margin-bottom: 20px; animation: spin 2s infinite; }
+        @keyframes spin { 0% {transform: rotate(0deg);} 50% {transform: rotate(90deg);} 100% {transform: rotate(0deg);} }
+
+        /* --- MOBILE MEDIA QUERIES --- */
+        @media only screen and (orientation: portrait) {
+            /* Se tiver em pé no celular, bloqueia o jogo */
+            #rotate-screen { display: flex; }
+        }
+
+        @media (max-width: 900px) and (orientation: landscape) {
+            /* AJUSTES PARA CELULAR DEITADO */
+            
+            .card {
+                width: 55px; height: 80px; /* Cartas menores */
+                font-size: 14px;
+            }
+            .card div:nth-child(2) { font-size: 20px !important; } /* Símbolo do naipe */
+
+            #center-area { width: 150px; height: 150px; }
+
+            /* Ajuste da sobreposição na mão */
+            .my-card { margin: 0 -20px; }
+            .my-card:hover { transform: translateY(-10px); margin: 0 -10px; }
+
+            /* Ajuste dos bots */
+            #p1 { right: 10px; } 
+            #p2 { top: 5px; }
+            #p3 { left: 10px; }
+
+            /* Esconde detalhes do HUD pra ganhar espaço */
+            #hud { font-size: 12px; padding: 5px; top: 5px; left: 5px; min-width: 100px; }
+            #trump-indicator { font-size: 16px; }
+
+            /* Botão Sair menor */
+            .btn-exit { padding: 5px 10px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TELA DE BLOQUEIO RETRATO -->
+<div id="rotate-screen">
+    <span>📱↻</span>
+    <h2>Por favor, gire seu celular</h2>
+    <p>O Quatrilho precisa de espaço na mesa!</p>
+</div>
+
+<button class="btn-exit" onclick="location.href='index.html'">Sair</button>
+
+<div id="hud">
+    <div id="trump-indicator">Trunfo: ???</div>
+    <div id="bid-info" style="color:#aaa; border-bottom:1px solid #555;">Aposta: -</div>
+    <div class="score-row"><span>Minhas Fig.:</span> <span id="my-points" style="color:lightgreen">0</span></div>
+    <div class="score-row"><span>Rodada:</span> <span id="round-num">1</span>/10</div>
+</div>
+
+<div id="message-toast"></div>
+
+<div id="game-table">
+    <div id="center-area"></div>
+    <div id="p0" class="player-hand hand-disabled"></div>
+    <div id="p1" class="player-hand"></div>
+    <div id="p2" class="player-hand"></div>
+    <div id="p3" class="player-hand"></div>
+</div>
+
+<!-- MODAIS -->
+<div id="modal-auction" class="modal">
+    <div class="modal-content">
+        <h2>Leilão</h2>
+        <p id="auction-msg">Quanto aposta?</p>
+        <div id="auction-buttons">
+            <button class="btn" onclick="placeBid(6)">6</button>
+            <button class="btn" onclick="placeBid(7)">7</button>
+            <button class="btn" onclick="placeBid(8)">8</button>
+            <button class="btn" onclick="placeBid(9)">9</button>
+            <button class="btn" onclick="placeBid(10)">10</button>
+            <br><br>
+            <button class="btn btn-pass" onclick="placeBid(0)">Passo</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-trump" class="modal">
+    <div class="modal-content">
+        <h2>Venceu!</h2>
+        <p>Escolha o Trunfo:</p>
+        <button class="btn btn-suit" onclick="setTrump('♥')" style="color:red">♥</button>
+        <button class="btn btn-suit" onclick="setTrump('♦')" style="color:red">♦</button>
+        <button class="btn btn-suit" onclick="setTrump('♣')">♣</button>
+        <button class="btn btn-suit" onclick="setTrump('♠')">♠</button>
+    </div>
+</div>
+
+<div id="modal-partner" class="modal">
+    <div class="modal-content">
+        <h2>Parceiro</h2>
+        <p>Escolha a carta do parceiro:</p>
+        <label>Carta:</label>
+        <select id="partner-rank" style="padding:5px; font-size:16px;">
+            <option value="A">Ás</option>
+            <option value="K">Rei</option>
+            <option value="3">Três</option>
+            <option value="2">Dois</option>
+            <option value="7">Sete</option>
+        </select>
+        <br><br>
+        <div style="margin-top:10px;">
+            <button class="btn btn-suit" onclick="setPartner('♥')" style="color:red">♥</button>
+            <button class="btn btn-suit" onclick="setPartner('♦')" style="color:red">♦</button>
+            <button class="btn btn-suit" onclick="setPartner('♣')">♣</button>
+            <button class="btn btn-suit" onclick="setPartner('♠')">♠</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* MESMA LÓGICA DO JOGO ANTERIOR, APENAS COPIE O SCRIPT JS DA VERSÃO ANTERIOR */
+    /* Para facilitar, vou repetir o bloco de script completo aqui embaixo para você só copiar e colar tudo */
+    
+    const SUITS = ['♥', '♦', '♣', '♠'];
+    const RANKS = ['3', '2', 'A', 'K', 'J', 'Q', '7', '6', '5', '4'];
+    const POINTS_MAP = {'A':1, '2':1, '3':1, 'K':1, 'J':1, 'Q':1, '7':0, '6':0, '5':0, '4':0};
+
+    let deck = [], players = [[], [], [], []], playerPoints = [0,0,0,0];
+    let currentTurn = 0, auctionWinner = -1, currentBid = 0, trumpSuit = null;
+    let partnerCard = null, partnerIndex = -1;
+    let tableCards = [], tricksPlayed = 0, inputLocked = true;
+
+    function initGame() {
+        createDeck(); dealCards(); resetState(); setTimeout(startAuction, 1000);
+    }
+
+    function resetState() {
+        tricksPlayed = 0; tableCards = []; playerPoints = [0,0,0,0];
+        trumpSuit = null; partnerCard = null; partnerIndex = -1;
+        document.getElementById('center-area').innerHTML = '';
+        document.getElementById('my-points').innerText = '0';
+        document.getElementById('round-num').innerText = '1';
+        updateHUD();
+    }
+
+    function createDeck() {
+        deck = [];
+        for (let s of SUITS) {
+            for (let r of RANKS) {
+                let power = RANKS.length - RANKS.indexOf(r);
+                let points = POINTS_MAP[r];
+                deck.push({ suit: s, rank: r, power: power, points: points, color: (s==='♥'||s==='♦')?'suit-red':'suit-black'});
+            }
+        }
+        deck.sort(() => Math.random() - 0.5);
+    }
+
+    function dealCards() {
+        players = [[], [], [], []];
+        for (let i=0; i<40; i++) { players[i%4].push(deck[i]); }
+        players[0].sort((a, b) => (a.suit !== b.suit) ? a.suit.localeCompare(b.suit) : b.power - a.power);
+        renderHands();
+    }
+
+    function renderHands() {
+        const p0Div = document.getElementById('p0');
+        p0Div.innerHTML = '';
+        players[0].forEach((card, idx) => {
+            const el = document.createElement('div');
+            el.className = `card my-card ${card.color}`;
+            el.innerHTML = `<div>${card.rank}</div><div style="font-size:20px; text-align:center">${card.suit}</div><div style="transform:rotate(180deg)">${card.rank}</div>`;
+            el.onclick = () => playCardHuman(idx);
+            el.id = `card-${idx}`;
+            p0Div.appendChild(el);
+        });
+        for (let i=1; i<=3; i++) {
+            const div = document.getElementById(`p${i}`);
+            div.innerHTML = '';
+            players[i].forEach(() => {
+                const back = document.createElement('div');
+                back.className = 'card card-back';
+                if(i===1 || i===3) {
+                    back.style.position = 'relative'; back.style.margin = '-50px 0';
+                    back.style.transform = i===1 ? 'rotate(-90deg)' : 'rotate(90deg)';
+                } else {
+                    back.style.position = 'relative'; back.style.margin = '0 -50px';
+                }
+                div.appendChild(back);
+            });
+        }
+    }
+
+    function startAuction() {
+        let botMax = 0, winnerBot = -1;
+        for(let i=1; i<=3; i++) {
+            let bid = (Math.random()>0.5) ? Math.floor(Math.random()*3)+6 : 0; 
+            if(bid>botMax) { botMax=bid; winnerBot=i; }
+        }
+        currentBid = botMax;
+        const msg = winnerBot===-1 ? "Ninguém." : `Bot ${winnerBot} pede ${currentBid}.`;
+        document.getElementById('auction-msg').innerText = `${msg} Cobre?`;
+        document.getElementById('modal-auction').style.display = 'flex';
+    }
+
+    function placeBid(val) {
+        document.getElementById('modal-auction').style.display = 'none';
+        if(val > currentBid) {
+            auctionWinner = 0; currentBid = val;
+            document.getElementById('modal-trump').style.display = 'flex';
+        } else {
+            if(currentBid === 0) { showToast("Mesa rodou. Reembaralhando..."); setTimeout(initGame, 2000); return; }
+            auctionWinner = 1; trumpSuit = SUITS[Math.floor(Math.random()*4)];
+            partnerCard = { rank: 'A', suit: SUITS.find(s => s !== trumpSuit) };
+            findPartnerIndex(); updateHUD();
+            showToast(`Bot venceu. Trunfo: ${trumpSuit}`);
+            startRoundLogic();
+        }
+    }
+
+    function setTrump(s) {
+        trumpSuit = s;
+        document.getElementById('modal-trump').style.display = 'none';
+        document.getElementById('modal-partner').style.display = 'flex';
+    }
+
+    function setPartner(s) {
+        const r = document.getElementById('partner-rank').value;
+        partnerCard = { rank: r, suit: s };
+        if(players[0].some(c => c.rank===r && c.suit===s)) { alert("Você tem essa carta!"); return; }
+        document.getElementById('modal-partner').style.display = 'none';
+        findPartnerIndex(); updateHUD(); startRoundLogic();
+    }
+
+    function findPartnerIndex() {
+        partnerIndex = -1;
+        for(let i=0; i<4; i++) {
+            if(players[i].some(c => c.rank===partnerCard.rank && c.suit===partnerCard.suit)) {
+                partnerIndex = i; break;
+            }
+        }
+        if(partnerIndex === -1) { showToast("Solo!", 2000); partnerIndex = auctionWinner; }
+    }
+
+    function updateHUD() {
+        document.getElementById('trump-indicator').innerText = `Trunfo: ${trumpSuit || '-'}`;
+        let pTxt = partnerCard ? `${partnerCard.rank}${partnerCard.suit}` : '-';
+        if(auctionWinner !== 0) pTxt = "???";
+        document.getElementById('bid-info').innerText = `Aposta: ${currentBid} | Parc: ${pTxt}`;
+    }
+
+    function startRoundLogic() {
+        currentTurn = auctionWinner; playTurn();
+    }
+
+    function playTurn() {
+        if (tableCards.length === 4) { inputLocked = true; setTimeout(resolveTrick, 1500); return; }
+        if (currentTurn === 0) { 
+            inputLocked = false; document.getElementById('p0').classList.remove('hand-disabled');
+            highlightValidCards(); 
+        } else { 
+            inputLocked = true; document.getElementById('p0').classList.add('hand-disabled');
+            setTimeout(botPlay, 700); 
+        }
+    }
+
+    function highlightValidCards() {
+        const myCards = players[0];
+        const uiCards = document.getElementById('p0').children;
+        let lead = tableCards.length>0 ? tableCards[0].card.suit : null;
+        let hasSuit = lead ? myCards.some(c => c.suit===lead) : false;
+        for(let i=0; i<myCards.length; i++) {
+            if(lead && hasSuit && myCards[i].suit !== lead) uiCards[i].classList.add('disabled');
+            else uiCards[i].classList.remove('disabled');
+        }
+    }
+
+    function playCardHuman(idx) {
+        if(inputLocked || currentTurn !== 0) return;
+        const el = document.getElementById(`card-${idx}`);
+        if(el.classList.contains('disabled')) { showToast("Siga o naipe!", 800); return; }
+        
+        inputLocked = true;
+        document.getElementById('p0').classList.add('hand-disabled');
+        const card = players[0].splice(idx, 1)[0];
+        animateToTable(el, card, 0);
+        currentTurn = (currentTurn + 1) % 4; playTurn();
+    }
+
+    function botPlay() {
+        const hand = players[currentTurn];
+        let idx = 0;
+        if(tableCards.length > 0) {
+            const lead = tableCards[0].card.suit;
+            const match = hand.findIndex(c => c.suit === lead);
+            if(match !== -1) idx = match;
+            else {
+                const tr = hand.findIndex(c => c.suit === trumpSuit);
+                if(tr !== -1) idx = tr;
+            }
+        }
+        const card = hand.splice(idx, 1)[0];
+        
+        const botEl = document.createElement('div');
+        botEl.className = `card ${card.color}`;
+        botEl.innerHTML = `<div>${card.rank}</div><div style="font-size:20px; text-align:center">${card.suit}</div><div style="transform:rotate(180deg)">${card.rank}</div>`;
+        const rect = document.getElementById(`p${currentTurn}`).getBoundingClientRect();
+        botEl.style.left = rect.left + 'px'; botEl.style.top = rect.top + 'px';
+        document.body.appendChild(botEl);
+        
+        animateToTable(botEl, card, currentTurn);
+        currentTurn = (currentTurn + 1) % 4; playTurn();
+    }
+
+    function animateToTable(el, card, pid) {
+        if(pid === 0) renderHands();
+        el.style.position = 'fixed'; el.classList.remove('my-card');
+        document.body.appendChild(el);
+        
+        const isMobile = window.innerWidth < 900;
+        const dist = isMobile ? 30 : 40;
+        const offsets = [{x:0,y:dist}, {x:dist,y:0}, {x:0,y:-dist}, {x:-dist,y:0}];
+        
+        setTimeout(() => {
+            el.style.left = (window.innerWidth/2 - (isMobile?27:40) + offsets[pid].x) + 'px';
+            el.style.top = (window.innerHeight/2 - (isMobile?40:60) + offsets[pid].y) + 'px';
+            el.style.transform = `rotate(${Math.random()*15-7}deg)`;
+        }, 50);
+        tableCards.push({card:card, player:pid, el:el});
+    }
+
+    function resolveTrick() {
+        let winner = tableCards[0];
+        const lead = tableCards[0].card.suit;
+        let pointsInTrick = 0;
+        for(let i=0; i<4; i++) {
+            const c = tableCards[i];
+            pointsInTrick += c.card.points;
+            if(i===0) continue;
+            const w = winner;
+            if(c.card.suit===trumpSuit && w.card.suit!==trumpSuit) winner=c;
+            else if(c.card.suit===trumpSuit && w.card.suit===trumpSuit && c.card.power>w.card.power) winner=c;
+            else if(w.card.suit!==trumpSuit && c.card.suit===lead && c.card.power>w.card.power) winner=c;
+        }
+        playerPoints[winner.player] += pointsInTrick;
+        if(winner.player === 0) document.getElementById('my-points').innerText = playerPoints[0];
+        showToast(`P${winner.player} levou! (+${pointsInTrick})`, 1000);
+        
+        tableCards.forEach(x => x.el.remove()); tableCards = []; tricksPlayed++;
+        if(tricksPlayed < 10) {
+            currentTurn = winner.player; document.getElementById('round-num').innerText = tricksPlayed + 1;
+            setTimeout(playTurn, 800);
+        } else { endGame(); }
+    }
+
+    function endGame() {
+        const teamBidderPoints = playerPoints[auctionWinner] + playerPoints[partnerIndex];
+        let msg = "", win = false;
+        if (teamBidderPoints >= currentBid) {
+            msg = `CHAMADOR GANHOU! Fez ${teamBidderPoints} (Aposta: ${currentBid}).`;
+            win = (auctionWinner === 0 || partnerIndex === 0);
+        } else {
+            msg = `CHAMADOR PERDEU! Fez só ${teamBidderPoints}.`;
+            win = (auctionWinner !== 0 && partnerIndex !== 0);
+        }
+        const pName = partnerIndex===0?"VOCÊ":`Bot ${partnerIndex}`;
+        alert(`FIM!\n\n${msg}\nParceiro: ${pName}\nSeus pontos: ${playerPoints[0]}\n${win?"VOCÊ GANHOU!":"VOCÊ PERDEU!"}`);
+        initGame();
+    }
+
+    function showToast(msg, time=2000) {
+        const t = document.getElementById('message-toast');
+        t.innerText = msg; t.style.display='block';
+        setTimeout(()=>t.style.display='none', time);
+    }
+
+    initGame();
+</script>
+</body>
+</html>
