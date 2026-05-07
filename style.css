@@ -846,3 +846,12 @@ footer a {
 }
 .folder-actions button.add { background: #d4af37; color: white; }
 .folder-actions button.del { background: #dc3545; color: white; }
+
+body.admin-mode .btn-new-folder {
+    display: block !important;
+}
+
+/* Mostra os botões pequenos (➕ e 🗑) do lado dos nomes das pastas */
+body.admin-mode .folder-actions {
+    display: flex !important;
+}

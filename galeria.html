@@ -68,32 +68,66 @@
   </div>
 </header>
 
-<main style="margin-top: 100px; padding-bottom: 50px;">
-  <div class="section-title-wrap">
-    <h2>Galeria de Momentos</h2>
-    <p class="muted">Fotos e Vídeos dos nossos encontros</p>
-  </div>
+<main>
+  <div class="gallery-container">
+    
+    <!-- BARRA LATERAL (PASTAS) -->
+    <aside class="sidebar">
+      <div class="folder-section">
+        <h3>📷 Fotos</h3>
+        <ul class="subfolders" id="folderListFotos">
+          <li class="active" onclick="filterGallery(null, 'foto', this)">Todas as Fotos</li>
+          <!-- Pastas carregadas via JS entrarão aqui -->
+        </ul>
+        <button class="btn-new-folder admin-only" onclick="createNewFolder('foto')">+ Nova Pasta de Fotos</button>
+      </div>
 
-  <div id="galleryGrid" class="gallery-page-grid">
-    <p style="text-align:center; width:100%;">Carregando...</p>
-  </div>
+      <div class="folder-section">
+        <h3>🎬 Vídeos</h3>
+        <ul class="subfolders" id="folderListVideos">
+          <li onclick="filterGallery(null, 'video', this)">Todos os Vídeos</li>
+          <!-- Pastas carregadas via JS entrarão aqui -->
+        </ul>
+        <button class="btn-new-folder admin-only" onclick="createNewFolder('video')">+ Nova Pasta de Vídeos</button>
+      </div>
+    </aside>
 
-  <!-- ADMIN PANEL -->
-  <section id="adminPanel" style="display:none; margin: 50px auto; max-width: 600px; border: 2px dashed red; background: #fff5f5; padding:20px; border-radius: 8px;">
-    <h3 style="color:red; text-align:center;">Adicionar Mídia</h3>
-    <form id="galleryForm">
-      <label>1. Escolha arquivos:</label>
-      <input type="file" id="galleryFiles" multiple required accept="image/*, video/*" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; background:white;">
-      
-      <label>2. Descrição (Opcional):</label>
-      <input type="text" id="galleryDesc" placeholder="Ex: Torneio" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc;">
-      
-      <button type="submit" class="btn btn-primary" style="background: red; width:100%;">Enviar</button>
-      
-      <div id="progressContainer"><div id="progressBar"></div></div>
-      <div id="progressText"></div>
-    </form>
-  </section>
+    <!-- ÁREA DOS ARQUIVOS -->
+    <div class="gallery-content-area">
+      <div class="section-title-wrap" style="text-align: left; margin-bottom: 20px;">
+        <h2 id="currentFolderName">Galeria</h2>
+        <p class="muted" id="currentFolderDesc">Selecione uma pasta ao lado</p>
+      </div>
+
+      <div id="galleryGrid" class="gallery-page-grid">
+        <p style="text-align:center; width:100%;">Carregando...</p>
+      </div>
+
+      <!-- ADMIN PANEL (Movido para cá e ajustado) -->
+      <section id="adminPanel" style="display:none; margin-top: 50px; border: 2px dashed red; background: #fff5f5; padding:20px; border-radius: 8px;">
+        <h3 style="color:red; margin-bottom: 15px;">Adicionar Mídia à Galeria</h3>
+        <form id="galleryForm">
+          <label style="font-weight:bold;">1. Escolha a Pasta de Destino:</label>
+          <select id="pastaSelect" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; background:white;">
+            <option value="">(Raiz - Sem pasta)</option>
+            <!-- Select preenchido via JS -->
+          </select>
+
+          <label style="font-weight:bold;">2. Escolha arquivos:</label>
+          <input type="file" id="galleryFiles" multiple required accept="image/*, video/*" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; background:white;">
+          
+          <label style="font-weight:bold;">3. Descrição (Opcional):</label>
+          <input type="text" id="galleryDesc" placeholder="Ex: Torneio" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc;">
+          
+          <button type="submit" class="btn btn-primary" style="background: red; width:100%; border:none;">Enviar para a Pasta</button>
+          
+          <div id="progressContainer"><div id="progressBar"></div></div>
+          <div id="progressText"></div>
+        </form>
+      </section>
+    </div>
+
+  </div>
 </main>
 
 <footer>
